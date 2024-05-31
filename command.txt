@@ -1,0 +1,37 @@
+kubectl create namespace groupe9-alone --kubeconfig kubeconfig.yml
+
+kubectl get namespaces --kubeconfig kubeconfig.yml
+
+
+
+kubectl  -n groupe9-alone --kubeconfig kubeconfig.yml
+
+
+
+
+kubectl  -n groupe9-alone --kubeconfig kubeconfig.yml
+
+helm -f promotheus.yml -n groupe9-alone --kubeconfig kubeconfig.yml install prometheus promotheus-community/promotheus
+
+helm -f grafana.yml -n groupe9-alone --kubeconfig kubeconfig.yml install grafana grafana/grafana
+
+kubectl get pods -o wide -n groupe9-alone --kubeconfig kubeconfig.yml
+
+kubectl get deployment --namespace groupe9-alone --kubeconfig kubeconfig.yml
+
+
+kubectl describe deployment groupe9-deploy --namespace groupe9-alone --kubeconfig kubeconfig.yml
+
+kubectl rollout undo deployment/mon-deployment -n groupe9-alone --kubeconfig kubeconfig.yml
+
+kubectl describe deployment groupe9-deploy --namespace groupe9-alone --kubeconfig kubeconfig.yml
+
+kubectl apply -f groupe9-mongo-pvc.yml --namespace groupe9-alone --kubeconfig kubeconfig.yml
+
+kubectl apply -f groupe9-mongo-deploy.yml --namespace groupe9-alone --kubeconfig kubeconfig.yml
+
+kubectl apply -f groupe9-mongo-svc.yml --namespace groupe9-alone --kubeconfig kubeconfig.yml
+
+
+
+

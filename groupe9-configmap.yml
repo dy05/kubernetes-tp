@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: groupe9-config
+  namespace: groupe9-alone
+data:
+  MEMBER_1: "Obby"
+  MEMBER_2: "Thierry"
+  MEMBER_3: "Gloria"

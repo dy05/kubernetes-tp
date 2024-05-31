@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: groupe9-deploy
+  namespace: groupe9-alone
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: groupe9-app
+  template:
+    metadata:
+      labels:
+        app: groupe9-app
+    spec:
+      containers:
+      - name: groupe9-container
+        image: thierrytemgoua98/groupe9-app:v3
+        ports:
+        - containerPort: 9500
+        env:
+        - name: MEMBER_1
+          valueFrom:
+            configMapKeyRef:
+              name: groupe9-config
+              key: MEMBER_1
+        - name: MEMBER_2
+          valueFrom:
+            configMapKeyRef:
+              name: groupe9-config
+              key: MEMBER_2
+        - name: MEMBER_3
+          valueFrom:
+            configMapKeyRef:
+              name: groupe9-config
+              key: MEMBER_3
+        - name: TEAM
+          valueFrom:
+            secretKeyRef:
+              name: groupe9-secret
+              key: TEAM
