@@ -1,28 +1,28 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: groupe9-mongo-deploy
+  name: groupe9-mongo-deployment
   namespace: groupe9-alone
 spec:
-  replicas: 2
+  replicas: 3
   selector:
     matchLabels:
-      app: mongodb
+      app: groupe9-mongodb
   template:
     metadata:
       labels:
-        app: mongodb
+        app: groupe9-mongodb
     spec:
       containers:
-      - name: mongodb
+      - name: groupe9-mongodb
         image: mongo
         ports:
         - containerPort: 27017
         volumeMounts:
-        - name: mongo-storage
+        - name: groupe9-mongo-storage
           mountPath: /data/db
       volumes:
-        - name: mongo-storage
+        - name: groupe9-mongo-storage
           persistentVolumeClaim:
             claimName: groupe9-mongo-pvc
 

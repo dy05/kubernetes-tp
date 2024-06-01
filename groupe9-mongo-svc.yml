@@ -5,7 +5,7 @@ metadata:
   namespace: groupe9-alone
 spec:
   selector:
-    app: mongodb
+    app: groupe9-mongodb
   ports:
     - protocol: TCP
       port: 27017

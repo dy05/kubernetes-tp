@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: groupe9-mongo-express-svc
+  namespace: groupe9-alone
+spec:
+  type: LoadBalancer
+  selector:
+    app: groupe9-mongo-express
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8081

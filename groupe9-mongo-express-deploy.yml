@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: groupe9-mongo-express-deployment
+  namespace: groupe9-alone
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: groupe9-mongo-express
+  template:
+    metadata:
+      labels:
+        app: groupe9-mongo-express
+    spec:
+      containers:
+      - name: groupe9-mongo-express
+        image: mongo-express
+        ports:
+        - containerPort: 8081
+        env:
+        - name: ME_CONFIG_MONGODB_SERVER
+          value: "groupe9-mongo-svc"
+        - name: ME_CONFIG_BASICAUTH_USERNAME
+          value: "gloria"
+        - name: ME_CONFIG_BASICAUTH_PASSWORD
+          value: "12345678"
+

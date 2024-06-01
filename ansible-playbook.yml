@@ -1,0 +1,124 @@
+----------
+- name: Manage Kubernetes Resources
+  hosts: localhost
+  gather_facts: no
+  tasks:
+    - name: Delete existing service groupe9-svc
+      k8s:
+        state: absent
+        name: groupe9-svc
+        kind: Service
+        namespace: groupe9-alone
+
+    - name: Recreate service groupe9-svc
+      k8s:
+        state: present
+        definition: 
+          apiVersion: v1
+          kind: Service
+          metadata:
+            name: groupe9-svc
+            namespace: groupe9-alone
+          spec:
+            selector:
+              app: groupe9-mongodb
+            ports:
+              - protocol: TCP
+                port: 27017
+                targetPort: 27017
+
+    - name: Deploy mongo-deployment
+      k8s:
+        state: present
+        definition: 
+          apiVersion: apps/v1
+          kind: Deployment
+          metadata:
+            name: groupe9-mongo-deployment
+            namespace: groupe9-alone
+          spec:
+            replicas: 2
+            selector:
+              matchLabels:
+                app: groupe9-mongodb
+            template:
+              metadata:
+                labels:
+                  app: groupe9-mongodb
+              spec:
+                containers:
+                - name: groupe9-mongodb
+                  image: mongo
+                  ports:
+                  - containerPort: 27017
+                  volumeMounts:
+                  - name: groupe9-mongo-storage
+                    mountPath: /data/db
+                volumes:
+                - name: groupe9-mongo-storage
+                  persistentVolumeClaim:
+                    claimName: groupe9-mongo-pvc
+
+    - name: Deploy groupe9-mongo-express-deployment
+      k8s:
+        state: present
+        definition: 
+          apiVersion: apps/v1
+          kind: Deployment
+          metadata:
+            name: groupe9-mongo-express-deployment
+            namespace: groupe9-alone
+          spec:
+            replicas: 1
+            selector:
+              matchLabels:
+                app: groupe9-mongo-express
+            template:
+              metadata:
+                labels:
+                  app: groupe9-mongo-express
+              spec:
+                containers:
+                - name: groupe9-mongo-express
+                  image: mongo-express
+                  ports:
+                  - containerPort: 8081
+                  env:
+                  - name: ME_CONFIG_MONGODB_SERVER
+                    value: "groupe9-mongo-svc"
+                  - name: ME_CONFIG_BASICAUTH_USERNAME
+                    value: "gloria"
+                  - name: ME_CONFIG_BASICAUTH_PASSWORD
+                    value: "12345678"
+
+    - name: Deploy ReplicaSet for httpd image
+      k8s:
+        state: present
+        definition: 
+          apiVersion: apps/v1
+          kind: ReplicaSet
+          metadata:
+            name: groupe9-httpd-rs
+            namespace: groupe9-alone
+          spec:
+            replicas: 2
+            selector:
+              matchLabels:
+                app: httpd
+            template:
+              metadata:
+                labels:
+                  app: httpd
+              spec:
+                containers:
+                - name: httpd
+                  image: httpd
+                  ports:
+                  - containerPort: 80
+
+    - name: Delete ingress groupe9-ingress
+      k8s:
+        state: absent
+        name: groupe9-ingress
+        kind: Ingress
+        namespace: groupe9-alone
