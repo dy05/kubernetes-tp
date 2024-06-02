@@ -1,7 +1,9 @@
-----------
+---
 - name: Manage Kubernetes Resources
   hosts: localhost
   gather_facts: no
+  vars:
+    ansible_python_interpreter: ./myenv/bin/python
   tasks:
     - name: Delete existing service groupe9-svc
       k8s:
@@ -9,6 +11,7 @@
         name: groupe9-svc
         kind: Service
         namespace: groupe9-alone
+        kubeconfig: ./kubeconfig.yml
 
     - name: Recreate service groupe9-svc
       k8s:
@@ -21,11 +24,13 @@
             namespace: groupe9-alone
           spec:
             selector:
-              app: groupe9-mongodb
+              app: groupe9-app
             ports:
-              - protocol: TCP
-                port: 27017
-                targetPort: 27017
+            - protocol: TCP
+              port: 80
+              targetPort: 9500
+            type: LoadBalancer
+        kubeconfig: ./kubeconfig.yml
 
     - name: Deploy mongo-deployment
       k8s:
@@ -37,7 +42,7 @@
             name: groupe9-mongo-deployment
             namespace: groupe9-alone
           spec:
-            replicas: 2
+            replicas: 1
             selector:
               matchLabels:
                 app: groupe9-mongodb
@@ -58,6 +63,7 @@
                 - name: groupe9-mongo-storage
                   persistentVolumeClaim:
                     claimName: groupe9-mongo-pvc
+        kubeconfig: ./kubeconfig.yml
 
     - name: Deploy groupe9-mongo-express-deployment
       k8s:
@@ -90,6 +96,7 @@
                     value: "gloria"
                   - name: ME_CONFIG_BASICAUTH_PASSWORD
                     value: "12345678"
+        kubeconfig: ./kubeconfig.yml
 
     - name: Deploy ReplicaSet for httpd image
       k8s:
@@ -101,7 +108,7 @@
             name: groupe9-httpd-rs
             namespace: groupe9-alone
           spec:
-            replicas: 2
+            replicas: 1
             selector:
               matchLabels:
                 app: httpd
@@ -115,6 +122,7 @@
                   image: httpd
                   ports:
                   - containerPort: 80
+        kubeconfig: ./kubeconfig.yml
 
     - name: Delete ingress groupe9-ingress
       k8s:
@@ -122,3 +130,10 @@
         name: groupe9-ingress
         kind: Ingress
         namespace: groupe9-alone
+        kubeconfig: ./kubeconfig.yml
+
+    - name: Apply deployment for groupe9-app in groupe9-deploy
+      k8s:
+        state: present
+        definition: "{{ lookup('file', './groupe9-deploy.yml') }}"
+        kubeconfig: ./kubeconfig.yml
