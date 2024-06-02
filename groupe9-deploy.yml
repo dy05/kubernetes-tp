@@ -39,3 +39,6 @@ spec:
             secretKeyRef:
               name: groupe9-secret
               key: TEAM
+      imagePullSecrets:
+      - name: groupe9-registry
+

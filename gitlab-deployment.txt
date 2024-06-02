@@ -1,0 +1,93 @@
+GITLAB
+
+
+Docker Hub
+
+Si vous utilisez Docker Hub, vous pouvez générer une clé d'accès ou utiliser votre nom d'utilisateur et votre mot de passe.
+Amazon ECR
+
+Pour Amazon ECR, vous pouvez créer une politique IAM qui donne accès à ECR et générer des clés d'accès AWS.
+Étape 2: Ajouter la clé d'accès à GitLab CI/CD
+
+    Accéder aux variables de CI/CD dans GitLab :
+        Allez dans votre projet GitLab.
+        Cliquez sur "Settings" (Paramètres) > "CI / CD".
+        Dans la section "Variables", cliquez sur "Add variable".
+
+    Ajouter les variables nécessaires :
+        Pour Docker Hub :
+            DOCKER_USERNAME: Votre nom d'utilisateur Docker Hub.
+            DOCKER_PASSWORD: Votre mot de passe Docker Hub.
+        Pour Amazon ECR :
+            AWS_ACCESS_KEY_ID: Votre clé d'accès AWS.
+            AWS_SECRET_ACCESS_KEY: Votre clé secrète AWS.
+            AWS_DEFAULT_REGION: La région AWS où se trouve votre ECR.
+
+
+----- avec Docker
+
+stages:
+  - build
+  - deploy
+
+variables:
+  IMAGE_NAME: $CI_REGISTRY_IMAGE/$CI_COMMIT_REF_SLUG
+
+before_script:
+  - docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD"
+
+build:
+  stage: build
+  script:
+    - docker build -t $IMAGE_NAME .
+    - docker push $IMAGE_NAME
+
+deploy:
+  stage: deploy
+  script:
+    - kubectl set image deployment/groupe9-app groupe9-app=$IMAGE_NAME
+
+
+
+
+---- Amazon
+
+``Fichier aws_login.sh
+
+#!/bin/sh
+aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
+
+``Changement de permissions pour executer
+chmod +x aws_login.sh
+
+``.gitlab-ci.yml
+
+stages:
+  - build
+  - deploy
+
+variables:
+  IMAGE_NAME: $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$CI_PROJECT_NAME:$CI_COMMIT_REF_SLUG
+
+before_script:
+  - ./aws_login.sh
+
+build:
+  stage: build
+  script:
+    - docker build -t $IMAGE_NAME .
+    - docker push $IMAGE_NAME
+
+deploy:
+  stage: deploy
+  script:
+    - kubectl set image deployment/groupe9-app groupe9-app=$IMAGE_NAME
+
+
+
+
+
+
+
+
+

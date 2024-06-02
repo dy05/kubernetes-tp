@@ -35,4 +35,24 @@ kubectl apply -f groupe9-mongo-svc.yml --namespace groupe9-alone --kubeconfig ku
 
 
 
+generer la valeur de .dockerconfigjson pour le groupe9-registry
+
+
+generer le base64 du <base64-encoded-auth>
+
+echo -n 'username:password' | base64
+
+le resultat est votre <base64-encoded-auth> que vous allez mettre dans la commande suivante
+
+echo -n '{"auths":{"https://index.docker.io/v1/":{"username":"<your-username>","password":"<your-password>","email":"<your-email>","auth":"<base64-encoded-auth>"}}}' | base64 -w 0
+
+
+vous generer et le resultat sera la valeur de <base64-encoded-docker-config> dans le groupe9-registry
+
+
+Executer le groupe9-registry
+
+kubectl apply -f groupe9-registry.yml --namespace groupe9-alone --kubeconfig kubeconfig.yml
+
+
 
